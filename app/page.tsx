@@ -1,65 +1,91 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import { getFeaturedProjects, getBlogs, getPageContent } from "@/lib/api";
 
-export default function Home() {
+import HeroSection from "../app/components/home/HeroSection";
+import StatsSection from "../app/components/home/StatsSection";
+import FeaturedProjects from "../app/components/home/FeaturedProjects";
+import WhyChooseUs from "../app/components/home/WhyChooseUs";
+import CTASection from "../app/components/home/CTASection";
+import TestimonialsSection from "../app/components/home/TestimonialsSection";
+import BlogHighlights from "../app/components/home/BlogHighlights";
+import ContactSection from "../app/components/home/ContactSection";
+
+export const metadata: Metadata = {
+  title: "RealEstateBD — Premium Property Developers in Bangladesh",
+  description:
+    "Discover premium residential projects in Dhaka and across Bangladesh. Trusted by 950+ families for over 20 years.",
+};
+
+// ISR — revalidate every hour
+export const revalidate = 3600;
+
+export default async function HomePage() {
+  // Fetch all data in parallel (server-side)
+  const [projectsRes, blogsRes, statsRes] = await Promise.allSettled([
+    getFeaturedProjects(),
+    getBlogs({ limit: 3 }),
+    getPageContent("home-stats"),
+  ]);
+
+  const projects =
+    projectsRes.status === "fulfilled" ? projectsRes.value.data : [];
+  const blogs = blogsRes.status === "fulfilled" ? blogsRes.value.data : [];
+  const statsContent =
+    statsRes.status === "fulfilled"
+      ? (statsRes.value.data.content as Record<string, unknown>)
+      : null;
+
+  // Map CMS stats to StatItem format (with fallbacks)
+  const stats = statsContent
+    ? [
+        {
+          value: Number(statsContent.yearsExperience) || 20,
+          suffix: "+",
+          label: "Years Experience",
+        },
+        {
+          value: Number(statsContent.completedProjects) || 35,
+          suffix: "+",
+          label: "Projects Delivered",
+        },
+        {
+          value: Number(statsContent.totalUnitsDelivered) || 1200,
+          suffix: "+",
+          label: "Units Handed Over",
+        },
+        {
+          value: Number(statsContent.happyFamilies) || 950,
+          suffix: "+",
+          label: "Happy Families",
+        },
+      ]
+    : undefined;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+      {/* 1. Hero — full-screen slider */}
+      <HeroSection />
+
+      {/* 2. Key statistics */}
+      <StatsSection stats={stats} />
+
+      {/* 3. Featured projects with category filter */}
+      <FeaturedProjects projects={projects} />
+
+      {/* 4. Why choose us + value pillars */}
+      <WhyChooseUs />
+
+      {/* 5. Buyers & Landowners CTA */}
+      <CTASection />
+
+      {/* 6. Testimonials carousel */}
+      <TestimonialsSection />
+
+      {/* 7. Latest blog articles */}
+      <BlogHighlights blogs={blogs} />
+
+      {/* 8. Contact / inquiry form */}
+      <ContactSection />
+    </>
   );
 }
