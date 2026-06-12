@@ -1,7 +1,7 @@
 // app/admin/login/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -15,25 +15,32 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-export default function AdminLogin() {
+// Component that uses useSearchParams must be wrapped in Suspense
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { login, isAuthenticated, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const registered = searchParams.get("registered");
+  const registered = searchParams?.get("registered");
+
+  // Mark component as mounted to avoid hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
+    if (mounted && !authLoading && isAuthenticated) {
       console.log("Already authenticated, redirecting to dashboard");
       router.push("/admin/dashboard");
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router, mounted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +60,18 @@ export default function AdminLogin() {
       setLoading(false);
     }
   };
+
+  // Don't render anything until mounted (avoids hydration mismatch)
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-stone-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while checking auth
   if (authLoading) {
@@ -229,5 +248,23 @@ export default function AdminLogin() {
         </p>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function AdminLogin() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-stone-500">Loading login page...</p>
+          </div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
