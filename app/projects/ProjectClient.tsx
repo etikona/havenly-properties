@@ -203,7 +203,7 @@ export default function ProjectsClient({
                     {project.title}
                   </h3>
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {project.summary}
+                    {project?.description}
                   </p>
 
                   <div className="space-y-2 mb-4">
@@ -215,7 +215,7 @@ export default function ProjectsClient({
                       <Calendar className="w-4 h-4 mr-2" />
                       <span>
                         Expected Completion:{" "}
-                        {new Date(project.completionDate).toLocaleDateString(
+                        {new Date(project?.completionDate).toLocaleDateString(
                           "en-US",
                           { year: "numeric", month: "long" },
                         )}
