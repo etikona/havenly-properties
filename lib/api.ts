@@ -38,11 +38,11 @@ export interface Project {
   totalUnits?: string;
 }
 
-// export interface PageContent {
-//   _id: string;
-//   key: string;
-//   content: Record<string, any>;
-// }
+export interface PageContent {
+  _id: string;
+  key: string;
+  content: Record<string, any>;
+}
 
 export interface LeadData {
   type: "buyer" | "landowner" | "contact";
