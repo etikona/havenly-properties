@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MapPin, ArrowRight, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Project } from "@/types";
 
 const categories = ["All", "Ongoing", "Upcoming", "Completed"] as const;
 type Category = (typeof categories)[number];
