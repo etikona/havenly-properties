@@ -169,11 +169,10 @@ export default function AboutClient() {
           </div>
           <div className="relative h-[400px] rounded-xl overflow-hidden shadow-xl">
             <Image
-              src="/images/about-story.jpg"
+              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="RealEstateBD Story"
               className="object-cover"
-              width={300}
-              height={400}
+              fill
             />
           </div>
         </div>
