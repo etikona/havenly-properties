@@ -2,7 +2,10 @@
 
 const API_BASE_URL = "https://heavenly-backend-6y7j.onrender.com/api/v1";
 
-// Types
+// ============================================
+// TYPES
+// ============================================
+
 export interface BlogPost {
   _id: string;
   title: string;
@@ -40,6 +43,33 @@ export interface PageContent {
   content: Record<string, any>;
 }
 
+export interface LeadData {
+  name: string;
+  email: string;
+  phone: string;
+  message?: string;
+  projectId?: string;
+  projectName?: string;
+  source?: string;
+  preferredContactMethod?: "email" | "phone" | "whatsapp";
+  preferredTime?: string;
+}
+
+export interface LeadResponse {
+  success: boolean;
+  data?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    message?: string;
+    projectId?: string;
+    status: "new" | "contacted" | "qualified" | "lost";
+    createdAt: string;
+  };
+  message?: string;
+}
+
 interface LoginCredentials {
   email: string;
   password: string;
@@ -65,7 +95,10 @@ interface AuthResponse {
   admin: User;
 }
 
-// Cookie management utilities
+// ============================================
+// COOKIE MANAGEMENT UTILITIES
+// ============================================
+
 const CookieManager = {
   set(name: string, value: string, days: number = 7) {
     if (typeof document === "undefined") return;
@@ -94,16 +127,18 @@ const CookieManager = {
   },
 };
 
+// ============================================
+// API SERVICE CLASS (AUTHENTICATED REQUESTS)
+// ============================================
+
 class ApiService {
   private token: string | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
-      // Try to get token from cookie first, then localStorage as fallback
       this.token =
         CookieManager.get("adminToken") || localStorage.getItem("adminToken");
 
-      // If token exists in localStorage but not in cookie, migrate it
       if (
         !CookieManager.get("adminToken") &&
         localStorage.getItem("adminToken")
@@ -133,12 +168,10 @@ class ApiService {
   setToken(token: string, rememberMe: boolean = true) {
     this.token = token;
     if (typeof window !== "undefined") {
-      // Store in both cookie and localStorage for redundancy
-      const days = rememberMe ? 7 : 1; // 7 days or 1 day
+      const days = rememberMe ? 7 : 1;
       CookieManager.set("adminToken", token, days);
       localStorage.setItem("adminToken", token);
 
-      // Also store token expiry info
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + days);
       localStorage.setItem("tokenExpiry", expiryDate.toISOString());
@@ -186,13 +219,10 @@ class ApiService {
     }
 
     const data = await response.json();
-    console.log("LOGIN API RESPONSE", data);
 
-    // Store the token
     if (data.token) {
       this.setToken(data.token, credentials.rememberMe);
 
-      // Store user data
       if (typeof window !== "undefined" && data.admin) {
         localStorage.setItem("adminUser", JSON.stringify(data.admin));
       }
@@ -238,8 +268,6 @@ class ApiService {
 
     const data = await response.json();
 
-    console.log("GETME API RESPONSE:", data);
-
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch user");
     }
@@ -269,7 +297,6 @@ class ApiService {
     return await response.json();
   }
 
-  // Generic methods for future API calls
   async get(endpoint: string) {
     if (this.isTokenExpired()) {
       this.removeToken();
@@ -396,7 +423,7 @@ class ApiService {
 export const api = new ApiService();
 
 // ============================================
-// PUBLIC API FUNCTIONS FOR HOME PAGE
+// PUBLIC API FUNCTIONS
 // ============================================
 
 /**
@@ -408,7 +435,7 @@ export async function getFeaturedProjects(
 ): Promise<{ data: Project[] }> {
   try {
     const response = await fetch(`${API_BASE_URL}/project`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -423,19 +450,15 @@ export async function getFeaturedProjects(
 
     let projects = result.data || [];
 
-    // Sort: featured projects first, then by creation date
     projects = projects.sort((a: Project, b: Project) => {
       if (a.isFeatured === b.isFeatured) {
-        // If both have same featured status, sort by date (newer first)
         const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return dateB - dateA;
       }
-      // Featured projects come first
       return a.isFeatured ? -1 : 1;
     });
 
-    // Apply limit
     if (limit) {
       projects = projects.slice(0, limit);
     }
@@ -472,7 +495,7 @@ export async function getBlogs(
     }
 
     const response = await fetch(url, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -581,7 +604,6 @@ export async function getAllProjects(
 
     let projects = result.data || [];
 
-    // Apply filters
     if (options.category) {
       projects = projects.filter(
         (p: Project) => p.category === options.category,
@@ -592,7 +614,6 @@ export async function getAllProjects(
       projects = projects.filter((p: Project) => p.isFeatured === true);
     }
 
-    // Apply limit
     if (options.limit) {
       projects = projects.slice(0, options.limit);
     }
@@ -615,9 +636,7 @@ export async function getAllBlogs(
   } = {},
 ): Promise<BlogPost[]> {
   try {
-    let url = `${API_BASE_URL}/blog`;
-
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE_URL}/blog`, {
       next: { revalidate: 3600 },
     });
 
@@ -633,7 +652,6 @@ export async function getAllBlogs(
 
     let blogs = result.data || [];
 
-    // Apply filters
     if (options.category) {
       blogs = blogs.filter((b: BlogPost) => b.category === options.category);
     }
@@ -642,7 +660,6 @@ export async function getAllBlogs(
       blogs = blogs.filter((b: BlogPost) => b.tags.includes(options.tag!));
     }
 
-    // Apply limit
     if (options.limit) {
       blogs = blogs.slice(0, options.limit);
     }
@@ -661,10 +678,6 @@ export async function getPageContent(
   key: string,
 ): Promise<{ data: PageContent } | null> {
   try {
-    // For now, return default stats since the endpoint might not exist
-    // You can replace this with actual API call when the endpoint is available
-
-    // Default stats for the home page
     const defaultStats: Record<string, any> = {
       "home-stats": {
         yearsExperience: 20,
@@ -683,23 +696,6 @@ export async function getPageContent(
         },
       };
     }
-
-    // If you have an actual API endpoint for page content, use this:
-    /*
-    const response = await fetch(`${API_BASE_URL}/content/${key}`, {
-      next: { revalidate: 3600 },
-    });
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error(`Failed to fetch page content: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    return result;
-    */
 
     return null;
   } catch (error) {
@@ -729,8 +725,311 @@ export async function getBlogTags(): Promise<string[]> {
   }
 }
 
+// ============================================
+// LEAD MANAGEMENT FUNCTIONS
+// ============================================
+
 /**
- * Submit contact form data
+ * Submit a lead to the backend
+ * Creates a new lead entry in the database
+ */
+export async function submitLead(leadData: LeadData): Promise<LeadResponse> {
+  try {
+    // Validate required fields
+    if (!leadData.name || !leadData.email || !leadData.phone) {
+      throw new Error("Name, email, and phone are required fields");
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(leadData.email)) {
+      throw new Error("Please provide a valid email address");
+    }
+
+    // Validate phone format
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(leadData.phone)) {
+      throw new Error("Please provide a valid phone number");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/lead`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...leadData,
+        source: leadData.source || "website_contact_form",
+        status: "new",
+        createdAt: new Date().toISOString(),
+      }),
+    });
+
+    // Handle authentication error
+    if (response.status === 401) {
+      console.warn(
+        "Lead API requires authentication. Lead saved locally only.",
+      );
+
+      const localLeads = JSON.parse(
+        localStorage.getItem("pendingLeads") || "[]",
+      );
+      localLeads.push({
+        ...leadData,
+        id: Date.now(),
+        pendingSync: true,
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem("pendingLeads", JSON.stringify(localLeads));
+
+      return {
+        success: true,
+        data: {
+          _id: `local_${Date.now()}`,
+          name: leadData.name,
+          email: leadData.email,
+          phone: leadData.phone,
+          message: leadData.message,
+          projectId: leadData.projectId,
+          status: "new",
+          createdAt: new Date().toISOString(),
+        },
+        message: "Lead saved locally. Will sync when authenticated.",
+      };
+    }
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ message: "Failed to submit lead" }));
+      throw new Error(
+        error.message || `Failed to submit lead: ${response.status}`,
+      );
+    }
+
+    const result = await response.json();
+
+    // Store in localStorage for backup
+    const submittedLeads = JSON.parse(
+      localStorage.getItem("submittedLeads") || "[]",
+    );
+    submittedLeads.push({
+      ...leadData,
+      serverId: result.data?._id,
+      submittedAt: new Date().toISOString(),
+    });
+    localStorage.setItem("submittedLeads", JSON.stringify(submittedLeads));
+
+    return result;
+  } catch (error) {
+    console.error("Error submitting lead:", error);
+
+    // Store failed lead in localStorage for retry
+    const failedLeads = JSON.parse(localStorage.getItem("failedLeads") || "[]");
+    failedLeads.push({
+      ...leadData,
+      failedAt: new Date().toISOString(),
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    localStorage.setItem("failedLeads", JSON.stringify(failedLeads));
+
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to submit lead",
+    };
+  }
+}
+
+/**
+ * Sync pending leads (useful for authenticated sessions)
+ * Call this after login to sync any leads saved while unauthenticated
+ */
+export async function syncPendingLeads(): Promise<{
+  synced: number;
+  failed: number;
+}> {
+  try {
+    const pendingLeads = JSON.parse(
+      localStorage.getItem("pendingLeads") || "[]",
+    );
+
+    if (pendingLeads.length === 0) {
+      return { synced: 0, failed: 0 };
+    }
+
+    let synced = 0;
+    let failed = 0;
+    const token =
+      localStorage.getItem("adminToken") || CookieManager.get("adminToken");
+
+    for (const lead of pendingLeads) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/lead`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify(lead),
+        });
+
+        if (response.ok) {
+          synced++;
+        } else {
+          failed++;
+        }
+      } catch (error) {
+        failed++;
+        console.error("Failed to sync lead:", error);
+      }
+    }
+
+    // Clear synced leads
+    if (synced > 0) {
+      const remainingLeads = pendingLeads.slice(-failed);
+      localStorage.setItem("pendingLeads", JSON.stringify(remainingLeads));
+    }
+
+    return { synced, failed };
+  } catch (error) {
+    console.error("Error syncing pending leads:", error);
+    return { synced: 0, failed: 0 };
+  }
+}
+
+/**
+ * Get all leads (requires authentication)
+ * For admin dashboard use
+ */
+export async function getAllLeads(options?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}): Promise<{
+  success: boolean;
+  data?: LeadResponse["data"][];
+  total?: number;
+}> {
+  try {
+    const token =
+      localStorage.getItem("adminToken") || CookieManager.get("adminToken");
+
+    if (!token) {
+      throw new Error("Authentication required to fetch leads");
+    }
+
+    const { page = 1, limit = 50, status } = options || {};
+    let url = `${API_BASE_URL}/lead?page=${page}&limit=${limit}`;
+
+    if (status) {
+      url += `&status=${status}`;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 401) {
+      throw new Error("Session expired. Please login again.");
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch leads: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching leads:", error);
+    return { success: false };
+  }
+}
+
+/**
+ * Update lead status (requires authentication)
+ * For admin dashboard to manage lead status
+ */
+export async function updateLeadStatus(
+  leadId: string,
+  status: "new" | "contacted" | "qualified" | "lost",
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const token =
+      localStorage.getItem("adminToken") || CookieManager.get("adminToken");
+
+    if (!token) {
+      throw new Error("Authentication required to update lead status");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/lead/${leadId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (response.status === 401) {
+      throw new Error("Session expired. Please login again.");
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to update lead status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error updating lead status:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Update failed",
+    };
+  }
+}
+
+/**
+ * Get lead by ID (requires authentication)
+ */
+export async function getLeadById(
+  leadId: string,
+): Promise<LeadResponse | null> {
+  try {
+    const token =
+      localStorage.getItem("adminToken") || CookieManager.get("adminToken");
+
+    if (!token) {
+      throw new Error("Authentication required to fetch lead");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/lead/${leadId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error(`Failed to fetch lead: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching lead:", error);
+    return null;
+  }
+}
+
+/**
+ * Submit contact form data (legacy function)
  */
 export async function submitContactForm(formData: {
   name: string;
@@ -740,7 +1039,6 @@ export async function submitContactForm(formData: {
   source?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    // For Google Sheets integration
     const GOOGLE_SHEETS_WEBHOOK = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
 
     if (GOOGLE_SHEETS_WEBHOOK) {
@@ -756,6 +1054,9 @@ export async function submitContactForm(formData: {
         }),
       });
     }
+
+    // Also submit as lead
+    await submitLead(formData);
 
     return { success: true };
   } catch (error) {
