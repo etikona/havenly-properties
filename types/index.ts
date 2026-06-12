@@ -18,7 +18,7 @@ export interface Project {
   title: string;
   slug: string;
   category: "ongoing" | "upcoming" | "completed";
-  summary: string;
+  summary?: string;
   location: string;
   completionDate: string;
   isFeatured: boolean;
@@ -26,6 +26,6 @@ export interface Project {
   createdAt?: string;
   description?: string; // For detail page
   features?: string[];
-  price?: string;
-  area?: string;
+  totalArea?: string;
+  totalUnits?: string;
 }

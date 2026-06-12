@@ -157,8 +157,10 @@ export default function ProjectDetailClient({
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-500 text-sm">Project ID</p>
-                  <p className="text-gray-900 font-semibold">{project._id}</p>
+                  <p className="text-gray-500 text-sm">Project Details</p>
+                  <p className="text-gray-900 font-semibold">
+                    {project.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -206,7 +208,7 @@ export default function ProjectDetailClient({
                 <p className="text-sm text-gray-600 text-center">
                   Or call us directly: <br />
                   <a
-                    href="tel:+8801700000000"
+                    href="tel:+8801764320172"
                     className="font-semibold text-amber-700"
                   >
                     +880 1700-000000

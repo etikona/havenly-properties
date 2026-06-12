@@ -75,27 +75,27 @@ function ProjectCard({ project }: ProjectCardProps) {
           <span className="line-clamp-1">{project.location}</span>
         </div>
 
-        {project.summary && (
+        {project.description && (
           <p className="text-stone-500 text-sm leading-relaxed line-clamp-2 mb-4 flex-1">
-            {project.summary}
+            {project.description}
           </p>
         )}
 
         {/* Meta */}
         <div className="flex items-center justify-between pt-4 border-t border-stone-100 mt-auto">
           <div className="flex gap-4 text-xs text-stone-500">
-            {project.totalUnits && (
+            {project?.totalUnits && (
               <span>
-                <span className="font-semibold text-stone-700">
-                  {project.totalUnits}
+                <span className="font-semibold text-gray-950">
+                  {project?.totalUnits}
                 </span>{" "}
                 Units
               </span>
             )}
-            {project.totalArea && (
+            {project?.totalArea && (
               <span>
-                <span className="font-semibold text-stone-700">
-                  {project.totalArea}
+                <span className="font-semibold text-gray-950">
+                  {project?.totalArea}
                 </span>
               </span>
             )}
@@ -113,7 +113,7 @@ function ProjectCard({ project }: ProjectCardProps) {
 function ProjectSkeleton() {
   return (
     <div className="rounded-xl overflow-hidden border border-stone-100 bg-white animate-pulse">
-      <div className="aspect-[4/3] bg-stone-100" />
+      <div className="aspect-4/3 bg-stone-100" />
       <div className="p-5 space-y-3">
         <div className="h-4 bg-stone-100 rounded w-3/4" />
         <div className="h-3 bg-stone-100 rounded w-1/2" />

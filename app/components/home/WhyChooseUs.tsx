@@ -1,47 +1,52 @@
-import Link from 'next/link';
-import { Shield, Clock, Award, Users, ArrowRight, CheckCircle2 } from 'lucide-react';
+import Link from "next/link";
+import {
+  Shield,
+  Clock,
+  Award,
+  Users,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
 const pillars = [
   {
     icon: Shield,
-    title: 'RAJUK & BNBC Compliant',
+    title: "RAJUK & BNBC Compliant",
     description:
-      'Every project strictly adheres to government regulations, ensuring your investment is legally sound and structurally safe.',
+      "Every project strictly adheres to government regulations, ensuring your investment is legally sound and structurally safe.",
   },
   {
     icon: Clock,
-    title: 'On-Time Delivery',
+    title: "On-Time Delivery",
     description:
-      'We have a 95%+ on-time handover record across 35+ projects spanning two decades of construction.',
+      "We have a 95%+ on-time handover record across 35+ projects spanning two decades of construction.",
   },
   {
     icon: Award,
-    title: 'Award-Winning Quality',
+    title: "Award-Winning Quality",
     description:
-      'REHAB-recognized developer with multiple industry awards for construction excellence and customer satisfaction.',
+      "REHAB-recognized developer with multiple industry awards for construction excellence and customer satisfaction.",
   },
   {
     icon: Users,
-    title: 'Post-Handover Support',
+    title: "Post-Handover Support",
     description:
-      'Our relationship doesn\'t end at handover. Dedicated maintenance team available for 2 years post-possession.',
+      "Our relationship doesn't end at handover. Dedicated maintenance team available for 2 years post-possession.",
   },
 ];
 
 const highlights = [
-  'Transparent pricing — no hidden charges',
-  'In-house architecture & engineering team',
-  'Bank-approved projects for easy home loans',
-  'Digital construction progress tracking',
+  "Transparent pricing — no hidden charges",
+  "In-house architecture & engineering team",
+  "Bank-approved projects for easy home loans",
+  "Digital construction progress tracking",
 ];
 
 export default function WhyChooseUs() {
   return (
     <section className="py-20 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-
           {/* Left: image + badge */}
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
@@ -56,9 +61,13 @@ export default function WhyChooseUs() {
 
             {/* Floating stat card */}
             <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-2xl p-5 border border-stone-100 max-w-[180px]">
-              <div className="text-3xl font-bold text-stone-900 tabular-nums">20+</div>
+              <div className="text-3xl font-bold text-stone-900 tabular-nums">
+                20+
+              </div>
               <div className="text-xs text-stone-500 font-medium uppercase tracking-wide mt-1">
-                Years of Trusted<br />Development
+                Years of Trusted
+                <br />
+                Development
               </div>
               <div className="mt-3 h-1 w-8 bg-amber-500 rounded-full" />
             </div>
@@ -73,13 +82,14 @@ export default function WhyChooseUs() {
               Why Choose Us
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-5 leading-tight">
-              Building Bangladesh's<br />
+              Building Bangladeshs
+              <br />
               <span className="text-amber-600">Most Trusted</span> Homes
             </h2>
             <p className="text-stone-500 leading-relaxed mb-8">
-              For over two decades, we've been creating spaces where families thrive —
-              combining international design standards with deep understanding of Bangladeshi
-              living needs and aspirations.
+              For over two decades, we have been creating spaces where families
+              thrive — combining international design standards with deep
+              understanding of Bangladeshi living needs and aspirations.
             </p>
 
             {/* Highlights */}
@@ -112,11 +122,12 @@ export default function WhyChooseUs() {
                 <Icon className="w-5 h-5 text-amber-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <h3 className="font-bold text-stone-900 text-sm mb-2">{title}</h3>
-              <p className="text-stone-500 text-xs leading-relaxed">{description}</p>
+              <p className="text-stone-500 text-xs leading-relaxed">
+                {description}
+              </p>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
