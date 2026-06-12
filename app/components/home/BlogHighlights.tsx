@@ -1,25 +1,31 @@
-import Link from 'next/link';
-import { ArrowRight, Calendar, Eye, Tag } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import Link from "next/link";
+import { ArrowRight, Calendar, Eye, Tag } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import Image from "next/image";
+import { BlogPost } from "@/types";
 
 interface BlogCardProps {
-  blog: Blog;
+  blog?: BlogPost;
   featured?: boolean;
 }
 
 function BlogCard({ blog, featured = false }: BlogCardProps) {
+  console.log(blog);
   return (
     <Link
-      href={`/blog/${blog.slug}`}
-      className={`group flex flex-col bg-white rounded-xl overflow-hidden border border-stone-100 hover:border-amber-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${featured ? 'lg:flex-row' : ''}`}
+      href={`/blog/${blog?.slug}`}
+      className={`group flex flex-col bg-white rounded-xl overflow-hidden border border-stone-100 hover:border-amber-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${featured ? "lg:flex-row" : ""}`}
     >
       {/* Image */}
-      <div className={`relative overflow-hidden ${featured ? 'lg:w-1/2 aspect-[4/3] lg:aspect-auto' : 'aspect-[16/9]'}`}>
-        {blog.coverImage ? (
+      <div
+        className={`relative overflow-hidden ${featured ? "lg:w-1/2 aspect-[4/3] lg:aspect-auto" : "aspect-[16/9]"}`}
+      >
+        {blog?.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={blog.coverImage}
-            alt={blog.title}
+          <Image
+            src={blog?.coverImage}
+            alt={blog?.title}
+            fill
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -27,20 +33,22 @@ function BlogCard({ blog, featured = false }: BlogCardProps) {
             <Tag className="w-10 h-10 text-amber-200" />
           </div>
         )}
-        {blog.category && (
+        {blog?.category && (
           <div className="absolute top-3 left-3">
             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500 text-white">
-              {blog.category}
+              {blog?.category}
             </span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className={`p-5 flex flex-col flex-1 ${featured ? 'lg:p-8 lg:justify-center' : ''}`}>
+      <div
+        className={`p-5 flex flex-col flex-1 ${featured ? "lg:p-8 lg:justify-center" : ""}`}
+      >
         {/* Meta */}
         <div className="flex items-center gap-3 text-xs text-stone-400 mb-3">
-          {blog.publishedAt && (
+          {blog?.publishedAt && (
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {formatDate(blog.publishedAt)}
@@ -48,25 +56,29 @@ function BlogCard({ blog, featured = false }: BlogCardProps) {
           )}
           <span className="flex items-center gap-1">
             <Eye className="w-3 h-3" />
-            {blog.views.toLocaleString()} views
+            {blog?.views.toLocaleString()} views
           </span>
         </div>
 
         {/* Title */}
-        <h3 className={`font-bold text-stone-900 group-hover:text-amber-700 transition-colors mb-2 line-clamp-2 ${featured ? 'text-xl sm:text-2xl' : 'text-base'}`}>
-          {blog.title}
+        <h3
+          className={`font-bold text-stone-900 group-hover:text-amber-700 transition-colors mb-2 line-clamp-2 ${featured ? "text-xl sm:text-2xl" : "text-base"}`}
+        >
+          {blog?.title}
         </h3>
 
         {/* Excerpt */}
-        {blog.excerpt && (
+        {blog?.excerpt && (
           <p className="text-stone-500 text-sm leading-relaxed line-clamp-2 mb-4 flex-1">
-            {blog.excerpt}
+            {blog?.excerpt}
           </p>
         )}
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-stone-100">
-          <span className="text-xs text-stone-400 font-medium">{blog.author}</span>
+          <span className="text-xs text-stone-400 font-medium">
+            {blog?.author}
+          </span>
           <span className="inline-flex items-center gap-1 text-amber-600 text-xs font-semibold group-hover:gap-2 transition-all">
             Read More <ArrowRight className="w-3.5 h-3.5" />
           </span>
@@ -78,8 +90,12 @@ function BlogCard({ blog, featured = false }: BlogCardProps) {
 
 function BlogSkeleton({ featured = false }: { featured?: boolean }) {
   return (
-    <div className={`rounded-xl overflow-hidden border border-stone-100 bg-white animate-pulse ${featured ? 'lg:flex' : ''}`}>
-      <div className={`bg-stone-100 ${featured ? 'lg:w-1/2 aspect-[4/3]' : 'aspect-[16/9]'}`} />
+    <div
+      className={`rounded-xl overflow-hidden border border-stone-100 bg-white animate-pulse ${featured ? "lg:flex" : ""}`}
+    >
+      <div
+        className={`bg-stone-100 ${featured ? "lg:w-1/2 aspect-[4/3]" : "aspect-[16/9]"}`}
+      />
       <div className="p-5 space-y-3 flex-1">
         <div className="h-3 bg-stone-100 rounded w-1/3" />
         <div className="h-5 bg-stone-100 rounded w-full" />
@@ -92,7 +108,7 @@ function BlogSkeleton({ featured = false }: { featured?: boolean }) {
 }
 
 interface Props {
-  blogs: Blog[];
+  blogs: BlogPost[];
   loading?: boolean;
 }
 
@@ -102,7 +118,6 @@ export default function BlogHighlights({ blogs, loading = false }: Props) {
   return (
     <section className="py-20 bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>

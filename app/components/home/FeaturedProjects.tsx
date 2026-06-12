@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { MapPin, ArrowRight, Building2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import Link from "next/link";
+import { MapPin, ArrowRight, Building2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
-const categories = ['All', 'Ongoing', 'Upcoming', 'Completed'] as const;
+const categories = ["All", "Ongoing", "Upcoming", "Completed"] as const;
 type Category = (typeof categories)[number];
 
 interface ProjectCardProps {
@@ -22,9 +23,10 @@ function ProjectCard({ project }: ProjectCardProps) {
       <div className="relative overflow-hidden aspect-[4/3]">
         {project.bannerImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={project.bannerImage}
             alt={project.title}
+            fill
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -35,13 +37,16 @@ function ProjectCard({ project }: ProjectCardProps) {
 
         {/* Category badge */}
         <div className="absolute top-3 left-3">
-          <span className={cn(
-            'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold',
-            project.category === 'ongoing'   && 'bg-emerald-500 text-white',
-            project.category === 'upcoming'  && 'bg-blue-500 text-white',
-            project.category === 'completed' && 'bg-stone-700 text-white',
-          )}>
-            {project.category.charAt(0).toUpperCase() + project.category.slice(1)}
+          <span
+            className={cn(
+              "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold",
+              project.category === "ongoing" && "bg-emerald-500 text-white",
+              project.category === "upcoming" && "bg-blue-500 text-white",
+              project.category === "completed" && "bg-stone-700 text-white",
+            )}
+          >
+            {project.category.charAt(0).toUpperCase() +
+              project.category.slice(1)}
           </span>
         </div>
 
@@ -79,10 +84,19 @@ function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex items-center justify-between pt-4 border-t border-stone-100 mt-auto">
           <div className="flex gap-4 text-xs text-stone-500">
             {project.totalUnits && (
-              <span><span className="font-semibold text-stone-700">{project.totalUnits}</span> Units</span>
+              <span>
+                <span className="font-semibold text-stone-700">
+                  {project.totalUnits}
+                </span>{" "}
+                Units
+              </span>
             )}
             {project.totalArea && (
-              <span><span className="font-semibold text-stone-700">{project.totalArea}</span></span>
+              <span>
+                <span className="font-semibold text-stone-700">
+                  {project.totalArea}
+                </span>
+              </span>
             )}
           </div>
           <span className="text-amber-600 text-xs font-semibold group-hover:gap-2 flex items-center gap-1 transition-all">
@@ -115,16 +129,16 @@ interface Props {
 }
 
 export default function FeaturedProjects({ projects, loading = false }: Props) {
-  const [activeCategory, setActiveCategory] = useState<Category>('All');
+  const [activeCategory, setActiveCategory] = useState<Category>("All");
 
-  const filtered = activeCategory === 'All'
-    ? projects
-    : projects.filter((p) => p.category === activeCategory.toLowerCase());
+  const filtered =
+    activeCategory === "All"
+      ? projects
+      : projects.filter((p) => p.category === activeCategory.toLowerCase());
 
   return (
     <section className="py-20 bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
           <div>
@@ -150,10 +164,10 @@ export default function FeaturedProjects({ projects, loading = false }: Props) {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                 activeCategory === cat
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'bg-white text-stone-500 hover:text-stone-800 border border-stone-200 hover:border-stone-300'
+                  ? "bg-amber-600 text-white shadow-sm"
+                  : "bg-white text-stone-500 hover:text-stone-800 border border-stone-200 hover:border-stone-300",
               )}
             >
               {cat}
@@ -163,17 +177,18 @@ export default function FeaturedProjects({ projects, loading = false }: Props) {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <ProjectSkeleton key={i} />)
-            : filtered.length > 0
-              ? filtered.map((project) => <ProjectCard key={project._id} project={project} />)
-              : (
-                <div className="col-span-full text-center py-16 text-stone-400">
-                  <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p>No projects found in this category.</p>
-                </div>
-              )
-          }
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => <ProjectSkeleton key={i} />)
+          ) : filtered.length > 0 ? (
+            filtered.map((project) => (
+              <ProjectCard key={project._id} project={project} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-16 text-stone-400">
+              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>No projects found in this category.</p>
+            </div>
+          )}
         </div>
       </div>
     </section>
