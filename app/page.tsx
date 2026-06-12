@@ -91,7 +91,7 @@ export default async function HomePage() {
       <BlogHighlights blogs={blogs} />
 
       {/* 8. Contact / inquiry form */}
-      {/* <ContactSection /> */}
+      <ContactSection />
     </>
   );
 }

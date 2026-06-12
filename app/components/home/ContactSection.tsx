@@ -47,21 +47,72 @@ export default function ContactSection() {
     e.preventDefault();
     setStatus("loading");
     setErrorMsg("");
+
     try {
-      await submitLead({ type: activeType, ...form });
-      setStatus("success");
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        message: "",
-        projectInterest: "",
-        budget: "",
-        unitType: "",
-        landLocation: "",
-        landSize: "",
-        landDocumentType: "",
+      // Prepare message based on lead type
+      let fullMessage = form.message;
+
+      if (
+        activeType === "buyer" &&
+        (form.projectInterest || form.unitType || form.budget)
+      ) {
+        fullMessage =
+          `[BUYER INQUIRY]\n${form.message || ""}\n\nProject Interest: ${form.projectInterest || "Not specified"}\nUnit Type: ${form.unitType || "Not specified"}\nBudget: ${form.budget || "Not specified"}`.trim();
+      } else if (
+        activeType === "landowner" &&
+        (form.landLocation || form.landSize)
+      ) {
+        fullMessage =
+          `[LANDOWNER JOINT VENTURE]\n${form.message || ""}\n\nLand Location: ${form.landLocation || "Not specified"}\nLand Size: ${form.landSize || "Not specified"}`.trim();
+      } else if (activeType === "contact") {
+        fullMessage =
+          `[GENERAL CONTACT]\n${form.message || "No message provided"}`.trim();
+      }
+
+      // Submit lead using the API
+      const result = await submitLead({
+        type: activeType,
+        name: form.name,
+        email: form.email,
+        phone: form.phone || "Not provided",
+        message: fullMessage,
+        source: `contact_section_${activeType}`,
+        preferredContactMethod: "whatsapp",
+
+        projectInterest: form.projectInterest,
+        budget: form.budget,
+        unitType: form.unitType,
+
+        landLocation: form.landLocation,
+        landSize: form.landSize,
+        landDocumentType: form.landDocumentType,
       });
+
+      if (result.success) {
+        setStatus("success");
+        // Reset form
+        setForm({
+          name: "",
+          email: "",
+          phone: "",
+          message: "",
+          projectInterest: "",
+          budget: "",
+          unitType: "",
+          landLocation: "",
+          landSize: "",
+          landDocumentType: "",
+        });
+
+        // Open WhatsApp with pre-filled message (optional)
+        const whatsappMessage = `*New Lead from Website*%0A%0A*Type:* ${activeType.toUpperCase()}%0A*Name:* ${form.name}%0A*Email:* ${form.email}%0A*Phone:* ${form.phone || "Not provided"}%0A*Message:* ${fullMessage.substring(0, 500)}`;
+        window.open(
+          `https://wa.me/8801700000000?text=${whatsappMessage}`,
+          "_blank",
+        );
+      } else {
+        throw new Error(result.message || "Failed to submit lead");
+      }
     } catch (err: unknown) {
       setStatus("error");
       setErrorMsg(
@@ -85,12 +136,12 @@ export default function ContactSection() {
               Get In Touch
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-5">
-              Let's Talk About
+              Lets Talk About
               <br />
               <span className="text-amber-600">Your Dream</span>
             </h2>
             <p className="text-stone-500 leading-relaxed mb-10">
-              Whether you're a first-time buyer, an investor, or a landowner
+              Whether you are a first-time buyer, an investor, or a landowner
               looking for a trusted partner — our team is ready to help you take
               the next step.
             </p>
@@ -185,17 +236,19 @@ export default function ContactSection() {
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <CheckCircle className="w-14 h-14 text-emerald-500 mb-4" />
                   <h3 className="text-lg font-bold text-stone-900 mb-2">
-                    Message Sent!
+                    Message Sent Successfully!
                   </h3>
+                  <p className="text-stone-500 text-sm mb-2">
+                    Thank you for reaching out to RealEstateBD.
+                  </p>
                   <p className="text-stone-500 text-sm mb-6">
-                    Thank you for reaching out. Our team will contact you within
-                    24 hours.
+                    Our team will contact you via WhatsApp within 24 hours.
                   </p>
                   <button
                     onClick={() => setStatus("idle")}
                     className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg transition-colors"
                   >
-                    Send Another
+                    Send Another Inquiry
                   </button>
                 </div>
               ) : (
@@ -224,6 +277,9 @@ export default function ContactSection() {
                         value={form.phone}
                         onChange={(e) => set("phone", e.target.value)}
                       />
+                      <p className="text-xs text-stone-400 mt-1">
+                        We will contact you via WhatsApp
+                      </p>
                     </div>
                   </div>
 
@@ -272,12 +328,14 @@ export default function ContactSection() {
                             <option>3 Bedroom</option>
                             <option>4 Bedroom</option>
                             <option>Penthouse</option>
+                            <option>Studio</option>
+                            <option>Duplex</option>
                           </select>
                         </div>
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
-                          Budget Range
+                          Budget Range (BDT)
                         </label>
                         <select
                           className={inputCls}
@@ -285,10 +343,11 @@ export default function ContactSection() {
                           onChange={(e) => set("budget", e.target.value)}
                         >
                           <option value="">Select budget</option>
-                          <option>Under 50 Lakh BDT</option>
-                          <option>50 Lakh – 1 Crore BDT</option>
-                          <option>1 – 2 Crore BDT</option>
-                          <option>Above 2 Crore BDT</option>
+                          <option>Under 50 Lakh</option>
+                          <option>50 Lakh – 1 Crore</option>
+                          <option>1 – 2 Crore</option>
+                          <option>2 – 3 Crore</option>
+                          <option>Above 3 Crore</option>
                         </select>
                       </div>
                     </>
@@ -296,30 +355,52 @@ export default function ContactSection() {
 
                   {/* Landowner-specific */}
                   {activeType === "landowner" && (
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
-                          Land Location
-                        </label>
-                        <input
-                          className={inputCls}
-                          placeholder="e.g. Mirpur, Dhaka"
-                          value={form.landLocation}
-                          onChange={(e) => set("landLocation", e.target.value)}
-                        />
+                    <>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
+                            Land Location
+                          </label>
+                          <input
+                            className={inputCls}
+                            placeholder="e.g. Mirpur, Dhaka"
+                            value={form.landLocation}
+                            onChange={(e) =>
+                              set("landLocation", e.target.value)
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
+                            Land Size
+                          </label>
+                          <input
+                            className={inputCls}
+                            placeholder="e.g. 10 Katha"
+                            value={form.landSize}
+                            onChange={(e) => set("landSize", e.target.value)}
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
-                          Land Size
+                          Document Status
                         </label>
-                        <input
+                        <select
                           className={inputCls}
-                          placeholder="e.g. 10 Katha"
-                          value={form.landSize}
-                          onChange={(e) => set("landSize", e.target.value)}
-                        />
+                          value={form.landDocumentType}
+                          onChange={(e) =>
+                            set("landDocumentType", e.target.value)
+                          }
+                        >
+                          <option value="">Select document status</option>
+                          <option>Clear Title Deed</option>
+                          <option>Mutations Complete</option>
+                          <option>Under Process</option>
+                          <option>Not Sure</option>
+                        </select>
                       </div>
-                    </div>
+                    </>
                   )}
 
                   {/* Message */}
@@ -358,6 +439,11 @@ export default function ContactSection() {
                       </>
                     )}
                   </button>
+
+                  <p className="text-xs text-stone-400 text-center mt-4">
+                    By submitting this form, you agree to our privacy policy and
+                    consent to being contacted via WhatsApp.
+                  </p>
                 </form>
               )}
             </div>

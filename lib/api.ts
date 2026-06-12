@@ -44,17 +44,32 @@ export interface PageContent {
 }
 
 export interface LeadData {
+  type: "buyer" | "landowner" | "contact";
+
   name: string;
   email: string;
   phone: string;
+
   message?: string;
+
   projectId?: string;
   projectName?: string;
+
   source?: string;
+
   preferredContactMethod?: "email" | "phone" | "whatsapp";
   preferredTime?: string;
-}
 
+  // Buyer specific
+  projectInterest?: string;
+  budget?: string;
+  unitType?: string;
+
+  // Landowner specific
+  landLocation?: string;
+  landSize?: string;
+  landDocumentType?: string;
+}
 export interface LeadResponse {
   success: boolean;
   data?: {
