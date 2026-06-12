@@ -1072,7 +1072,10 @@ export async function submitContactForm(formData: {
     }
 
     // Also submit as lead
-    await submitLead(formData);
+    await submitLead({
+      ...formData,
+      type: "contact",
+    });
 
     return { success: true };
   } catch (error) {
