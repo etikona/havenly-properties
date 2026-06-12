@@ -42,7 +42,7 @@ export default function ProjectsClient({
       const matchesSearch =
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project?.description.toLowerCase().includes(searchTerm.toLowerCase());
+        project.description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory =
         selectedCategory === "all" || project.category === selectedCategory;
       return matchesSearch && matchesCategory;
